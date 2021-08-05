@@ -18,6 +18,7 @@ interface Say {
 
 public class Demo10 {
 	public static void main(String[] args) {
+		// with no params
 		Hello hello = () -> {
 			return "Welcome";
 		};
@@ -35,7 +36,6 @@ public class Demo10 {
 			return a + b;
 		};
 		System.out.println(calculator.addNumber(10, 5));
-	
 	
 		// without return
 		Say say = (name) -> {
