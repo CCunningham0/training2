@@ -86,13 +86,14 @@ public class EmployeeDAOImpl implements EmployeeDAO {
 
 	@Override
 	public Employee employeeById(int id) throws SQLException {
-		List<Employee> currEmployees = getEmployees();
+		String sql = "delete from employee where id = " + id;
+	//	List<Employee> currEmployees = getEmployees();
 		
-		for (int i = 0; i < currEmployees.size(); i++) {
-			if ((currEmployees.get(i).getId()) == id){
-				return currEmployees.get(i);
-			}
-		}
+//		for (int i = 0; i < currEmployees.size(); i++) {
+//			if ((currEmployees.get(i).getId()) == id){
+//				return currEmployees.get(i);
+//			}
+//		}
 		return null;
 	}
 

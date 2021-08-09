@@ -6,8 +6,6 @@ import java.util.Scanner;
  * Main class for Bank application - Project0
  */
 public class Main {
-	static User user = new User(null, null);
-	
 	
 	public static void main(String[] args) {
 		
@@ -16,7 +14,7 @@ public class Main {
 		 * 	1. get input via scanner object
 		 * 	2. create custom stored procedure to perform some functionality (i.e. store account info?)
 		 * 	3. access database using JDBC and data access objects
-		 * 	4. use log4j to log events in a file
+		 * 	4. use log4j to log events in a file (learning Tuesday??)
 		 * 	5. write at least 1 JUnit test
 		 * 
 		 */
@@ -27,12 +25,16 @@ public class Main {
 		 * As a customer, I can apply for a new bank account with a starting balance. 
 		 * As a customer, I can view the balance of a specific account. 
 		 * As a customer, I can make a withdrawal or deposit to a specific account. 
+		 * 
 		 * As the system, I reject invalid transactions. 
-	 	 * Ex: * A withdrawal that would result in a negative balance.
+	 	 * Example: * A withdrawal that would result in a negative balance.
 		 * A deposit or withdrawal of negative money. 
+		 * 
 		 * As an employee, I can approve or reject an account. 
 		 * As an employee, I can view a customer's bank accounts. 
+		 * 
 		 * As a user, I can register for a customer account. 
+		 * 
 		 * As a customer, I can post a money transfer to another account. 
 		 * As a customer, I can accept a money transfer from another account. 
 		 * A an employee, I can view a log of all transactions.
@@ -42,7 +44,19 @@ public class Main {
 		// Start of application
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Welcome to the banking application!");
-		//FIXME: add functionality for new user to create account?
+		System.out.println("If you have an existing account, please enter 'yes'. Otherwise, enter 'no'.");
+		String hasAccount = scanner.nextLine().toLowerCase();
+		
+		if (hasAccount.equals("no")) {
+			System.out.println("To create a new account, please enter a username:");
+			String newUsername = scanner.nextLine();
+			
+			System.out.println("Please enter a password for your new account:");
+			String newPassword = scanner.nextLine();
+			
+			//FIXME: call from CustomerDAOImpl
+			//createAccount(newUsername, newPassword);
+		}
 		
 		System.out.println("Please enter your username.");
 		String username = scanner.nextLine().toLowerCase();
@@ -118,8 +132,6 @@ public class Main {
 				case 4: // call method for action
 			}
 		}
-
-
 		
 		return null;
 	}
@@ -136,8 +148,5 @@ public class Main {
 		}
 		return false;
 	}
-	
-	
-	
 	
 }
