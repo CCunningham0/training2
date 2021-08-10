@@ -1,5 +1,8 @@
 package bank;
 
+import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 
 /*
@@ -8,7 +11,7 @@ import java.util.Scanner;
 public class Main {
 	
 	public static void main(String[] args) {
-		
+		User user = new User();
 		/*
 		 * TODO:
 		 * 	1. get input via scanner object
@@ -40,6 +43,34 @@ public class Main {
 		 * A an employee, I can view a log of all transactions.
 		 */
 		
+		// TESTING
+		System.out.println("Testing...");
+		UserDAOImpl userImpl = new UserDAOImpl();
+		try {
+			if (userImpl.getCustomers().size() == 0) {
+				System.out.println("Table is empty!");
+				System.out.println(userImpl.getCustomers());
+			}
+			
+			//List<User> temp = userImpl.getCustomers(); // returns User list of users
+
+			// iterate through list
+			for (Iterator<User> iter = userImpl.getCustomers().iterator(); iter.hasNext();) {
+				User userIter = iter.next();
+				System.out.println("User id: " + userIter.getId() + ", name: " + userIter.getName());
+			}
+			System.out.println("*****************************************");
+			User temp = userImpl.getCustomerById(1); // returns User object
+			System.out.println("User id: " + temp.getId() + ", name: " + temp.getName());
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Done testing...");
+		
+		
 		
 		// Start of application
 		Scanner scanner = new Scanner(System.in);
@@ -70,10 +101,10 @@ public class Main {
 			return;
 		}
 		
-		System.out.println("Hello " + user.username + "!");
+		System.out.println("Hello " + user.getName() + "!");
 		
 		// if user is customer
-		if (user.userType.equals("customer")) {
+		if (user.getUserType().equals("customer")) {
 			System.out.println("Please enter a number, the options are as follows:\n"
 					+ "1. Apply for a new bank account.\n"
 					+ "2. View the balance of an account.\n"
@@ -84,7 +115,7 @@ public class Main {
 		}
 		
 		// if user is employee
-		if (user.userType.equals("employee")) {
+		if (user.getUserType().equals("employee")) {
 			System.out.println("Please enter an action, the options are as follows:\n"
 					+ "1. Approve or reject a pending account.\n"
 					+ "2. View customer's bank accounts.\n"
@@ -115,7 +146,7 @@ public class Main {
 	 * Validate and parse user input and return result
 	 */
 	public static <T> String parseInput(T input, User user) {
-		if (user.username.equals("customer")) {
+		if (user.getUserType().equals("customer")) {
 			switch((int)input) {
 				case 1: // call method for action
 				case 2: // call method for action

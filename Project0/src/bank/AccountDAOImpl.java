@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-public class AccountDAOImpl implements IAccount{
+public class AccountDAOImpl implements IAccountDAO{
 	private static Statement statement = null;
 	private static PreparedStatement preparedStatement = null;
 	Connection conn = null;
@@ -16,7 +16,7 @@ public class AccountDAOImpl implements IAccount{
 	}
 	
 	@Override
-	public void addAccount(IUser customer) throws SQLException {
+	public void addAccount(User user) throws SQLException {
 		// TODO Auto-generated method stub
 		
 	}
@@ -46,19 +46,19 @@ public class AccountDAOImpl implements IAccount{
 	}
 
 	@Override
-	public List<IAccount> getAccounts() throws SQLException {
+	public List<Account> getAccounts() throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public IAccount getAccountById(int id) throws SQLException {
+	public Account getAccountById(int id) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public IAccount getAccountBalance(int id) throws SQLException {
+	public Account getAccountBalance(int id) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
