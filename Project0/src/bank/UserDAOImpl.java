@@ -21,7 +21,6 @@ public class UserDAOImpl implements IUserDAO {
 	public void addUser(User user) throws SQLException {
 		String sql = "insert into users (name, password, user_type) values (?, ?, ?)";
 		preparedStatement = conn.prepareStatement(sql);
-		
 		preparedStatement.setString(1, user.getName());
 		preparedStatement.setString(2, user.getPassword());
 		preparedStatement.setString(3, user.getUserType());
@@ -29,6 +28,8 @@ public class UserDAOImpl implements IUserDAO {
 		
 		if (count > 0) // if getting 0, issue has occurred
 			System.out.println("Added customer!");
+		else
+			System.out.println("Sorry, an issue as occured.");
 	}
 
 	@Override
@@ -40,7 +41,7 @@ public class UserDAOImpl implements IUserDAO {
 		User user;
 		
 		while (resultSet.next()) {
-			user = new User(resultSet.getInt(1), resultSet.getString(2), "hidden", resultSet.getString(4));
+			user = new User(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getString(4));
 			users.add(user);
 		}
 		
@@ -55,12 +56,11 @@ public class UserDAOImpl implements IUserDAO {
 		ResultSet resultSet = statement.executeQuery(sql);
 		resultSet.next();
 		
-		if (resultSet == null) {
-			user = new User(resultSet.getInt(1), resultSet.getString(2), "hidden", resultSet.getString(4));
+		if (resultSet != null) {
+			user = new User(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getString(4));
 		} else {
 			System.out.println("No record found.");
 		}
-		
 		return user;
 	}
 }

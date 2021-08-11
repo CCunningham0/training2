@@ -25,8 +25,7 @@ public class ConnectionFactory {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			return conn;
 		}
-		return null;
+		return conn;
 	}
 }
