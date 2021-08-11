@@ -45,29 +45,73 @@ public class Main {
 		
 		// TESTING
 		System.out.println("Testing...");
+		
+		// UserDAOImpl method basic functionality working
+		// FIXME: add validation/error handling
+//		UserDAOImpl userImpl = new UserDAOImpl();
+//		try {
+//			if (userImpl.getUsers().size() == 0) {
+//				System.out.println("Table is empty!");
+//				User userTest = new User();
+//				// data to insert (id created & incremented automatically)
+//				userTest.setName("Moe");
+//				userTest.setPassword("iwantin");
+//				userTest.setUserType("customer");	
+//				
+//				IUserDAO dao = new UserDAOImpl();
+//				
+//				
+//				userImpl.addUser(userTest);
+//				
+//				
+//				System.out.println(userImpl.getUsers());
+//			}
+//			
+//			//List<User> temp = userImpl.getCustomers(); // returns User list of users
+//
+//			// iterate through list
+//			for (Iterator<User> iter = userImpl.getUsers().iterator(); iter.hasNext();) {
+//				User userIter = iter.next();
+//				System.out.println("User id: " + userIter.getId() + ", name: " + userIter.getName());
+//			}
+		
+//			System.out.println("*****************************************");
+//			User temp = userImpl.getUserById(1); // returns User object
+//			System.out.println("User id: " + temp.getId() + ", name: " + temp.getName());
+//
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		
+		AccountDAOImpl dao = new AccountDAOImpl();
 		UserDAOImpl userImpl = new UserDAOImpl();
+		Account newAccount = new Account(); // **not setting new account values in constructor because we don't want to manually set id
+		User userTest;
+		
 		try {
-			if (userImpl.getCustomers().size() == 0) {
-				System.out.println("Table is empty!");
-				System.out.println(userImpl.getCustomers());
-			}
+			userTest = userImpl.getUserById(1);
+			System.out.println("GOT USER: " + userTest);
 			
-			//List<User> temp = userImpl.getCustomers(); // returns User list of users
-
-			// iterate through list
-			for (Iterator<User> iter = userImpl.getCustomers().iterator(); iter.hasNext();) {
-				User userIter = iter.next();
-				System.out.println("User id: " + userIter.getId() + ", name: " + userIter.getName());
-			}
-			System.out.println("*****************************************");
-			User temp = userImpl.getCustomerById(1); // returns User object
-			System.out.println("User id: " + temp.getId() + ", name: " + temp.getName());
-
+			newAccount.setUserId(userTest.getId());
+			newAccount.setAccountType("savings"); // validation example: string should only be 'checking' or 'savings'
+			newAccount.setAccountBalance(200.00); // if no decimal included, must be cast from int to double
+			
+			dao.addAccount(newAccount, userTest);
+			
 		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		
+		
+		
+		
+		
+		
+		
 		System.out.println("Done testing...");
 		
 		

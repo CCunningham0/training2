@@ -1,16 +1,18 @@
 package bank;
 
 public class Account {
-	private int id;
-	private String name;
-	private String userId;
+	private int id; // unique and auto-increments
+	private int userId; // references users table
+	private String accountType; // savings or checking
+	private Double accountBalance; // account balance
 	
 	public Account() {};
 	
-	public Account(int id, String name, String userId) {
+	public Account(int id, int userId, String accountType, Double accountBalance) {
 		this.id = id;
-		this.name = name;
 		this.userId = userId;
+		this.accountType = accountType;
+		this.accountBalance = accountBalance;
 	}
 
 	public int getId() {
@@ -21,21 +23,27 @@ public class Account {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getUserId() {
+	public int getUserId() {
 		return userId;
 	}
 
-	public void setUserId(String userId) {
+	public void setUserId(int userId) {
 		this.userId = userId;
 	}
-	
-	
+
+	public String getAccountType() {
+		return accountType;
+	}
+
+	public void setAccountType(String accountType) {
+		this.accountType = accountType;
+	}
+
+	public Double getAccountBalance() {
+		return accountBalance;
+	}
+
+	public void setAccountBalance(Double accountBalance) {
+		this.accountBalance = accountBalance;
+	}	
 }

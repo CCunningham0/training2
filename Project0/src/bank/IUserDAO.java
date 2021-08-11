@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface IUserDAO {
-	void addCustomer(User customer) throws SQLException;
-	List<User> getCustomers() throws SQLException;
-	User getCustomerById(int id) throws SQLException;
+	void addUser(User customer) throws SQLException;
+	List<User> getUsers() throws SQLException;
+	User getUserById(int id) throws SQLException;
 }

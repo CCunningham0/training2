@@ -16,8 +16,17 @@ public class AccountDAOImpl implements IAccountDAO{
 	}
 	
 	@Override
-	public void addAccount(User user) throws SQLException {
-		// TODO Auto-generated method stub
+	public void addAccount(Account account, User user) throws SQLException {
+		String sql = "insert into accounts (user_id, account_type, balance) values (?, ?, ?)";
+		preparedStatement = conn.prepareStatement(sql);
+		
+		preparedStatement.setInt(1, user.getId());
+		preparedStatement.setString(2, account.getAccountType());
+		preparedStatement.setDouble(3, account.getAccountBalance());
+		int count = preparedStatement.executeUpdate();
+		
+		if (count > 0) // if getting 0, issue has occurred
+			System.out.println("Added account!");
 		
 	}
 

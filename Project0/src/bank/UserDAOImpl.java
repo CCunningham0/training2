@@ -18,40 +18,49 @@ public class UserDAOImpl implements IUserDAO {
 	}
 
 	@Override
-	public void addCustomer(User user) throws SQLException {
-		// don't insert Id and it auto-increments?
-		String sql = "insert into users (name, userType) values (?, ?)";
+	public void addUser(User user) throws SQLException {
+		String sql = "insert into users (name, password, user_type) values (?, ?, ?)";
+		preparedStatement = conn.prepareStatement(sql);
+		
 		preparedStatement.setString(1, user.getName());
-		preparedStatement.setString(2, user.getUserType());
-		int count = preparedStatement.executeUpdate(sql);
+		preparedStatement.setString(2, user.getPassword());
+		preparedStatement.setString(3, user.getUserType());
+		int count = preparedStatement.executeUpdate();
 		
 		if (count > 0) // if getting 0, issue has occurred
-			System.out.println("table_name saved!");
+			System.out.println("Added customer!");
 	}
 
 	@Override
-	public List<User> getCustomers() throws SQLException {
+	public List<User> getUsers() throws SQLException {
+		String sql = "select * from users";
 		statement = conn.createStatement();
-		List<User> customers = new ArrayList<User>();
-		String sql = "select * from users where user_type = 'customer'";
+		List<User> users = new ArrayList<User>();
 		ResultSet resultSet = statement.executeQuery(sql);
-		User customer;
+		User user;
 		
 		while (resultSet.next()) {
-			customer = new User(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3));
-			customers.add(customer);
-			//System.out.println(customer.getId() + " " + customer.getName());
+			user = new User(resultSet.getInt(1), resultSet.getString(2), "hidden", resultSet.getString(4));
+			users.add(user);
 		}
 		
-		return customers;
+		return users;
 	}
 
 	@Override
-	public User getCustomerById(int id) throws SQLException {
+	public User getUserById(int id) throws SQLException {
+		User user = new User();
 		String sql = "select * from users where id = " + id;
+		statement = conn.createStatement();
 		ResultSet resultSet = statement.executeQuery(sql);
 		resultSet.next();
-		User customer = new User(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3));
-		return customer;
+		
+		if (resultSet == null) {
+			user = new User(resultSet.getInt(1), resultSet.getString(2), "hidden", resultSet.getString(4));
+		} else {
+			System.out.println("No record found.");
+		}
+		
+		return user;
 	}
 }

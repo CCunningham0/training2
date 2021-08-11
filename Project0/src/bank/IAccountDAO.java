@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface IAccountDAO {
-	void addAccount(User customer) throws SQLException;
+	void addAccount(Account account, User user) throws SQLException;
 	
 	void withdrawFunds(int id, double amount) throws SQLException;
 	void depositFunds(int id, double amount) throws SQLException;
