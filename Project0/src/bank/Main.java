@@ -1,5 +1,6 @@
 package bank;
 
+import org.apache.log4j.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,14 +12,16 @@ import java.util.Scanner;
  */
 public class Main {
 	static Scanner scanner = new Scanner(System.in);
+	private static final Logger log = LogManager.getLogger(Main.class);
 	
 	public static void main(String[] args) throws SQLException {
 		User user = new User();
+		
 		/*
 		 * TODO:
-		 * 	1. get input via scanner object
-		 * 	2. create custom stored procedure to perform some functionality (i.e. store account info?)
-		 * 	3. access database using JDBC and data access objects
+		 * 	X. get input via scanner object
+		 * 	X. create custom stored procedure to perform some functionality (i.e. store account info?)
+		 * 	X. access database using JDBC and data access objects
 		 * 	4. use log4j to log events in a file (learning Tuesday??)
 		 * 	5. write at least 1 JUnit test
 		 * 
@@ -26,28 +29,37 @@ public class Main {
 
 		/*
 		 * ## User Stories
-		 * As a user, I can login. 
-		 * As a customer, I can apply for a new bank account with a starting balance. 
-		 * As a customer, I can view the balance of a specific account. 
-		 * As a customer, I can make a withdrawal or deposit to a specific account. 
+		 * X As a user, I can login. 
+		 * X As a customer, I can apply for a new bank account with a starting balance. 
+		 * X As a customer, I can view the balance of a specific account. 
+		 * X As a customer, I can make a withdrawal or deposit to a specific account. 
 		 * 
 		 * As the system, I reject invalid transactions. 
 		 * Example: * A withdrawal that would result in a negative balance.
 		 * A deposit or withdrawal of negative money. 
 		 * 
-		 * As an employee, I can approve or reject an account. 
-		 * As an employee, I can view a customer's bank accounts. 
+		 * X As an employee, I can approve or reject an account. 
+		 * X As an employee, I can view a customer's bank accounts. 
 		 * 
-		 * As a user, I can register for a customer account. 
+		 * X As a user, I can register for a customer account. 
 		 * 
-		 * As a customer, I can post a money transfer to another account. 
+		 * X As a customer, I can post a money transfer to another account. 
 		 * As a customer, I can accept a money transfer from another account. 
 		 * A an employee, I can view a log of all transactions.
 		 */
 
 		IUserDAO userDao = new UserDAOImpl();
 		IAccountDAO accountDao = new AccountDAOImpl();
+		IPendingAccountDAO pendingAccountDao = new PendingAccountDAOImpl();
 
+		ConsoleAppender consoleAppender = new ConsoleAppender();
+	    consoleAppender.setThreshold(Level.INFO);
+	    consoleAppender.setLayout(new PatternLayout("%d [%p|%c|%c{1}]"));
+        consoleAppender.activateOptions();
+        LogManager.getRootLogger().addAppender(consoleAppender);
+        
+	    List<String> logs = new ArrayList<>();
+		
 		scanner.useDelimiter(System.lineSeparator());
 		boolean running = true;
 
@@ -57,12 +69,12 @@ public class Main {
 
 
 		// Start of application
-		System.out.println("*****************************************");
+		System.out.println("****************************************\n");
 		System.out.println("Welcome to the banking application!");
-		System.out.println("*****************************************");
+		System.out.println("\n*****************************************");
 		System.out.println("To use the application, you must first sign in or create an account.");
 		System.out.println("If you have an existing account, please enter 'yes'. Otherwise, enter 'no'.");
-		String hasAccount = scanner.next().toLowerCase();
+		String hasAccount = parseInputString("yes", "no");
 
 		if (hasAccount.equals("no")) {
 			System.out.println("To create a new account, please enter a username:");
@@ -72,7 +84,7 @@ public class Main {
 			String newPassword = scanner.next();
 
 			System.out.println("Please enter 'employee' or 'customer' as per your case.");
-			String newUserType = scanner.next(); //FIXME: call getInput method so validation can be done
+			String newUserType = scanner.next();
 
 			user.setId(userDao.getUsers().size() + 1);
 			user.setName(newUsername);
@@ -97,8 +109,11 @@ public class Main {
 			}
 
 			user = userDao.getUserById(userId);
+		} else {
+			System.out.println("Please enter yes or no.");
+			return;
 		}
-		System.out.println("*****************************************");
+		System.out.println("*****************************************\n");
 		System.out.println("Hello, you signed in as: " + user.getName() + "!");
 
 		// Loop for action selection
@@ -124,19 +139,25 @@ public class Main {
 						
 						System.out.println("Please enter the initial balance for the account:");
 						double accountBal = parseInputDouble();
-	
-						Account newAccount = new Account();
-						newAccount.setUserId(user.getId());
-						newAccount.setAccountType(accountType);
-						newAccount.setAccountBalance(accountBal);
-	
-						//FIXME: create pending account request first then create after employee acceptance
-						accountDao.addAccount(newAccount);
+						if (accountBal < 1) {
+							System.out.println("Your cannot have a balance less than $1.00.");
+							break;
+						}
+						PendingAccount newPendingAccount = new PendingAccount();
+						newPendingAccount.setUserId(user.getId());
+						newPendingAccount.setAccountType(accountType);
+						newPendingAccount.setAccountBalance(accountBal);
+						
+						pendingAccountDao.addPendingAccount(newPendingAccount);
+						String message = "Added new pending account " + newPendingAccount.getId() + " for user " + newPendingAccount.getUserId();
+						System.out.println("Please enter yes or no");
+						logs.add(message);
 						break;
 					}
 	
 					// View balance of customer's selected account
-					case 2: { //FIXME: should only be allowed for current customer's accounts
+					// TODO: should only be allowed for current customer's accounts
+					case 2: { 
 						System.out.println("Please enter the account id:");
 						int accountId = scanner.nextInt();
 	
@@ -145,27 +166,48 @@ public class Main {
 					}
 	
 					// Withdraw from or deposit into customer's selected account
+					// TODO: should only be allowed for current customer's accounts
 					case 3: {
 						System.out.println("Please enter either 'deposit' or 'withdraw':");
-						String action = scanner.next().toLowerCase();
-						//scanner.next();
-	
+						String action = parseInputString("deposit", "withdraw");
+						if (action.equals("null")) {
+							System.out.println("Invalid action.");
+							break;
+						}
+						
 						System.out.println("Please enter the account id:");
 						int accountId = scanner.nextInt();
 						Account account = accountDao.getAccountById(accountId);
 	
-						System.out.println("ACTION: " + action);
 						if (action.equals("deposit")) {
 							System.out.println("Please enter the amount you would like to deposit:");
 							double amount = scanner.nextDouble();
+							if (amount <= 1) {
+								System.out.println("Deposit amount cannot be less than $1.00.");
+								break;
+							}
 							accountDao.depositFunds(account, amount);
 							System.out.println("Deposited $" + amount + " into account " + accountId + ".");
+							String message = "Deposited " + amount + " into account " + account.getId() + " for user " + account.getUserId();
+							System.out.println("Please enter yes or no");
+							logs.add(message);
 	
 						} else if (action.equals("withdraw")) {
 							System.out.println("Please enter the amount you would like to withdraw:");
 							double amount = scanner.nextDouble();
+							if (amount <= 1) {
+								System.out.println("Withdrawl amount cannot be less than $1.00.");
+								break;
+							} 
+							if (amount > account.getAccountBalance()) {
+								System.out.println("Withdrawl amount cannot be more than the current account balance.");
+								break;
+							}
 							accountDao.withdrawFunds(account, amount);
 							System.out.println("Withdrew $" + amount + " from account " + accountId + ".");
+							String message = "Withdrew " + amount + "from account " + account.getId() + " for user " + account.getUserId();
+							System.out.println("Please enter yes or no");
+							logs.add(message);
 						}
 						break;
 					}
@@ -181,9 +223,17 @@ public class Main {
 						Account receivingAccount = accountDao.getAccountById(receivingAccountId);
 	
 						System.out.println("Please enter the amount you would like to transfer:");
-						//FIXME: cannot be greater than current account balance (or less than 1 cent)
 						double amount = scanner.nextDouble();
-	
+						
+						if (amount <= 1) {
+							System.out.println("Cannot transfer less than $1.00.");
+							break;
+						}
+						if (amount > transferAccount.getAccountBalance()) {
+							System.out.println("Cannot transfer more than the account balance.");
+							break;
+						}
+						
 						PendingTransfer pendingTransfer = new PendingTransfer(
 								pendingTransfers.size() + 1,
 								user.getId(), 
@@ -207,6 +257,7 @@ public class Main {
 						List<PendingTransfer> myPendingTransfers = new ArrayList<>();
 	
 						// iterate through list of pending transfers and check for any for user
+						// TODO: reused loop is inefficient, should combine the two
 						for (Iterator<PendingTransfer> iter = pendingTransfers.iterator(); iter.hasNext();) {
 							pendingTransfer = iter.next();					
 							if (pendingTransfer.getUserId() == user.getId()) {
@@ -222,7 +273,7 @@ public class Main {
 						System.out.println("Your pending transfers are: ");
 						for (Iterator<PendingTransfer> iter = myPendingTransfers.iterator(); iter.hasNext();) {
 							pendingTransfer = iter.next();
-							System.out.println("Transfer of $" + pendingTransfer.getAmount() + " from account " 
+							System.out.println("Transfer id " + pendingTransfer.getTransferId() + " of $" + pendingTransfer.getAmount() + " from account " 
 									+ pendingTransfer.getTransferAccountId() + " to account "
 									+ pendingTransfer.getReceiveAccountId() + ".");
 						}
@@ -270,7 +321,55 @@ public class Main {
 				switch (selection) {
 					// Approve or reject a customer's pending account
 					case 1: {
+						PendingAccount pendingAccount;	
+					
+						System.out.println("The pending accounts are as follows:");
+						if (pendingAccountDao.getPendingAccounts().size() == 0) {
+							System.out.println("There are currently no pending accounts.");
+							break;
+						}
+						for (Iterator<PendingAccount> iter = pendingAccountDao.getPendingAccounts().iterator(); iter.hasNext();) {
+							pendingAccount = iter.next();
+							System.out.println("Pending account ID: " + pendingAccount.getId() + " | user ID: " + pendingAccount.getUserId()
+								+ " | account type: " + pendingAccount.getAccountType() + " | account balance: " + pendingAccount.getAccountBalance());
+						}
 						
+						System.out.println("Please select a pending account to manage by entering its ID:");
+						int pAccountId = scanner.nextInt();
+						pendingAccount = pendingAccountDao.getPendingAccountById(pAccountId);
+						
+						System.out.println("Please choose to either reject or accept the account by entering 'reject' or 'accept':");
+						String action = parseInputString("reject", "accept");
+								
+						if (action.equals("reject")) {
+							pendingAccountDao.removePendingAccount(pendingAccount);
+							String message = "Rejected pending account " + pendingAccount.getId() + " for user " + pendingAccount.getUserId();
+							System.out.println("Please enter yes or no");
+							logs.add(message);
+							break;
+						} 
+						
+						if (action.equals("accept")) {
+							Account newAccount = new Account();
+							newAccount.setUserId(pendingAccount.getUserId());
+							newAccount.setAccountType(pendingAccount.getAccountType());
+							newAccount.setAccountBalance(pendingAccount.getAccountBalance());
+							
+							accountDao.addAccount(newAccount);
+							String message = "Added new account " + newAccount.getId() + " for user " + newAccount.getUserId();
+							System.out.println("Please enter yes or no");
+							logs.add(message);
+							pendingAccountDao.removePendingAccount(pendingAccount);
+							message = "Accepted pending account " + pendingAccount.getId() + " for user " + pendingAccount.getUserId();
+							System.out.println("Please enter yes or no");
+							logs.add(message);
+						} 
+						
+						if (action.equals(null)) {
+							System.out.println("Invalid action.");
+							break;
+						}
+						break;
 					}
 					
 					// View a customer's accounts
@@ -302,7 +401,13 @@ public class Main {
 					
 					// View log of all transactions
 					case 3: {
-						
+						// TODO: write to then read logs from file?
+						System.out.println("Recorded logs:");
+						for (Iterator<String> iter = logs.iterator(); iter.hasNext();) {
+							String log = iter.next();	
+							System.out.println("-" + log);
+						}
+						break;
 					}
 					
 					// Invalid input
@@ -319,7 +424,6 @@ public class Main {
 	 * Get input from user with scanner object
 	 */
 	public static Double parseInputDouble(Double...values) {
-//		Scanner scanner = new Scanner(System.in);
 		scanner.useDelimiter(System.lineSeparator());
 		Double input = null;
 		try {
@@ -331,29 +435,28 @@ public class Main {
 		if (input > 0) 
 			return input;
 		
-		return null;
+		return -1.00;
 	}
 
 	/*
 	 * Validate and parse user input and return result
 	 */
 	public static String parseInputString(String...values) {
-//		Scanner scanner = new Scanner(System.in);
 		scanner.useDelimiter(System.lineSeparator());
 		String input = null;
 		try {
-			input = scanner.next();
+			input = scanner.next().toLowerCase();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 			
 		for (int i = 0; i < values.length; i++) {
 			if (input.equals(values[i])) {
-				System.out.println("Compared input: " + input + " to " + values[i]);
+				//System.out.println("Compared input: " + input + " to " + values[i]);
 				return input;
 			}
 		}
-		return null;
+		return "null";
 	}
 
 	/*
